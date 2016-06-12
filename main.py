@@ -465,7 +465,7 @@ poussee = 8
 
 CARBURANT_PAR_POUSSEE = 2
 
-NB_MUNITIONS_VAISSEAUX = 10
+NB_MUNITIONS_VAISSEAUX = 100
 
 ##Liste des différents objets
 planetes = []
@@ -558,39 +558,41 @@ while continuer:
                 for i in range(0,len(touchesPressees)): 
                     if touchesPressees[i] == 1 :
                         nomTouche = pygame.key.name(i)
-                        
-                        if nomTouche == touches[0][2]:
-                            vaisseaux[0].vitesse = Vecteur.somme(vaisseaux[0].vitesse,Vecteur.multiplie(vaisseaux[0].ur,poussee))
-                            vaisseaux[0].carburant -= CARBURANT_PAR_POUSSEE
-                        if nomTouche == touches[0][0]:
-                            vaisseaux[0].vitesse = Vecteur.somme(vaisseaux[0].vitesse,Vecteur.multiplie(vaisseaux[0].ur,-poussee))
-                            vaisseaux[0].carburant -= CARBURANT_PAR_POUSSEE
-                        if nomTouche == touches[0][3]:
-                            vaisseaux[0].vitesse = Vecteur.somme(vaisseaux[0].vitesse,Vecteur.multiplie(vaisseaux[0].utheta,poussee))
-                            vaisseaux[0].carburant -= CARBURANT_PAR_POUSSEE
-                        if nomTouche == touches[0][1]:
-                            vaisseaux[0].vitesse= Vecteur.somme(vaisseaux[0].vitesse,Vecteur.multiplie(vaisseaux[0].utheta,-poussee))
-                            vaisseaux[0].carburant -= CARBURANT_PAR_POUSSEE
-                        if nomTouche == touches[0][4]:
-                            missiles.append(Missile(Vecteur(vaisseaux[0].position.x,vaisseaux[0].position.y),Vecteur(vaisseaux[0].utheta.x*500,vaisseaux[0].utheta.y*500),0,len(missiles)))
-                            vaisseaux[0].munitions -= 1
+
+                        for j in range(nbVaisseaux):
+                            if nomTouche == touches[j][2]:
+                                vaisseaux[j].vitesse = Vecteur.somme(vaisseaux[j].vitesse,Vecteur.multiplie(vaisseaux[j].ur,poussee))
+                                vaisseaux[j].carburant -= CARBURANT_PAR_POUSSEE
+                            if nomTouche == touches[j][0]:
+                                vaisseaux[j].vitesse = Vecteur.somme(vaisseaux[j].vitesse,Vecteur.multiplie(vaisseaux[j].ur,-poussee))
+                                vaisseaux[j].carburant -= CARBURANT_PAR_POUSSEE
+                            if nomTouche == touches[j][3]:
+                                vaisseaux[j].vitesse = Vecteur.somme(vaisseaux[j].vitesse,Vecteur.multiplie(vaisseaux[j].utheta,poussee))
+                                vaisseaux[j].carburant -= CARBURANT_PAR_POUSSEE
+                            if nomTouche == touches[j][1]:
+                                vaisseaux[j].vitesse= Vecteur.somme(vaisseaux[j].vitesse,Vecteur.multiplie(vaisseaux[j].utheta,-poussee))
+                                vaisseaux[j].carburant -= CARBURANT_PAR_POUSSEE
+                            if nomTouche == touches[j][4]:
+                                if vaisseaux[j].munitions >0:
+                                    missiles.append(Missile(Vecteur(vaisseaux[j].position.x,vaisseaux[j].position.y),Vecteur(vaisseaux[j].utheta.x*500,vaisseaux[j].utheta.y*500),0,len(missiles)))
+                                    vaisseaux[j].munitions -= 1
                             
-                        if nbVaisseaux >= 2:
-                            if nomTouche == touches[1][2]:
-                                vaisseaux[1].vitesse = Vecteur.somme(vaisseaux[1].vitesse,Vecteur.multiplie(vaisseaux[1].ur,poussee))
-                                vaisseaux[1].carburant -= CARBURANT_PAR_POUSSEE
-                            if nomTouche == touches[1][0]:
-                                vaisseaux[1].vitesse = Vecteur.somme(vaisseaux[1].vitesse,Vecteur.multiplie(vaisseaux[1].ur,-poussee))
-                                vaisseaux[1].carburant -= CARBURANT_PAR_POUSSEE
-                            if nomTouche == touches[1][3]:
-                                vaisseaux[1].vitesse = Vecteur.somme(vaisseaux[1].vitesse,Vecteur.multiplie(vaisseaux[1].utheta,poussee))
-                                vaisseaux[1].carburant -= CARBURANT_PAR_POUSSEE
-                            if nomTouche == touches[1][1]:
-                                vaisseaux[1].vitesse= Vecteur.somme(vaisseaux[1].vitesse,Vecteur.multiplie(vaisseaux[1].utheta,-poussee))
-                                vaisseaux[1].carburant -= CARBURANT_PAR_POUSSEE
-                            if nomTouche == touches[1][4]:
-                                missiles.append(Missile(Vecteur(vaisseaux[1].position.x,vaisseaux[1].position.y),Vecteur(vaisseaux[1].utheta.x*500,vaisseaux[1].utheta.y*500),1,len(missiles)))        
-                                vaisseaux[1].munitions -= 1
+##                        if nbVaisseaux >= 2:
+##                            if nomTouche == touches[1][2]:
+##                                vaisseaux[1].vitesse = Vecteur.somme(vaisseaux[1].vitesse,Vecteur.multiplie(vaisseaux[1].ur,poussee))
+##                                vaisseaux[1].carburant -= CARBURANT_PAR_POUSSEE
+##                            if nomTouche == touches[1][0]:
+##                                vaisseaux[1].vitesse = Vecteur.somme(vaisseaux[1].vitesse,Vecteur.multiplie(vaisseaux[1].ur,-poussee))
+##                                vaisseaux[1].carburant -= CARBURANT_PAR_POUSSEE
+##                            if nomTouche == touches[1][3]:
+##                                vaisseaux[1].vitesse = Vecteur.somme(vaisseaux[1].vitesse,Vecteur.multiplie(vaisseaux[1].utheta,poussee))
+##                                vaisseaux[1].carburant -= CARBURANT_PAR_POUSSEE
+##                            if nomTouche == touches[1][1]:
+##                                vaisseaux[1].vitesse= Vecteur.somme(vaisseaux[1].vitesse,Vecteur.multiplie(vaisseaux[1].utheta,-poussee))
+##                                vaisseaux[1].carburant -= CARBURANT_PAR_POUSSEE
+##                            if nomTouche == touches[1][4]:
+##                                missiles.append(Missile(Vecteur(vaisseaux[1].position.x,vaisseaux[1].position.y),Vecteur(vaisseaux[1].utheta.x*500,vaisseaux[1].utheta.y*500),1,len(missiles)))        
+##                                vaisseaux[1].munitions -= 1
                 
         
         ##Affichage du fond
