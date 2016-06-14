@@ -19,12 +19,20 @@ import copy
 
 ##Dimensions de la fenetre
 TailleXFenetre = 1200
-TailleYFenetre = 600
+TailleYFenetre = 750
 
 #Initialisation de la bibliothèque Pygame
 pygame.init()
 
 fenetre = pygame.display.set_mode((TailleXFenetre, TailleYFenetre))
+
+
+###importer son
+##
+##son_menu = pygame.mixer.Sound("menu.wav")
+##son_explosion = pygame.mixer.Sound("explosion.wav")
+son_explosion = pygame.mixer.Sound("explosion.wav")
+
 
 class Couleur:
     '''Classe qui définit une couleur selon le taux de rouge vert et bleu'''
@@ -58,11 +66,13 @@ class Vecteur :
 
 class Vaisseau:
     '''Classe Vaisseau, qui contient les méthodes et informations des vaisseaux'''
-    def __init__(self,ID,Posinit,Vinit,C):
+    def __init__(self,ID,Posinit,Vinit,C,nomson,NOM):
 
         self.position = Posinit
         self.vitesse = Vinit
         self.acceleration = Vecteur(0,0)
+        self.son = pygame.mixer.Sound(nomson)
+        self.nom = NOM
         
         self.image =  pygame.image.load("vaisseau.png").convert_alpha()
         self.image = pygame.transform.scale(self.image,(TailleXVaisseau,TailleYVaisseau))
@@ -83,6 +93,10 @@ class Vaisseau:
         
         self.solide = pygame.Rect(self.position.x,self.position.y,TailleXVaisseau,TailleYVaisseau)
 
+        ##A rajhouter
+        self.initialiser_position()
+
+        
         self.couleur = C
 
 
@@ -117,7 +131,7 @@ class Vaisseau:
             self.acceleration.y = 0
             self.vitesse.x = 0.1
             self.vitesse.y = 0.1
-            self.pv -= 1
+            self.pv = 0
             ##print(self.pv)
             
         #on intègre l'accélération
@@ -167,7 +181,7 @@ class Vaisseau:
     def gererCollisions(self):
 
         carrevaisseau = [ vaisseaux[i].solide for i in range(nbVaisseaux)]
-        carresolide = carrevaisseau + carreplanete
+        carresolide = carrevaisseau + carreplanete +carrecomete
         
         carresolide.pop(self.id) ## on retire le vaisseau des objets bloqués
 
@@ -180,6 +194,24 @@ class Vaisseau:
         else:
             return(1)
 
+    ## A rajouter
+    def initialiser_position(self):
+        '''Calcul de la position initiale'''
+        
+        self.position = Vecteur(rd.randint(0,TailleXFenetre),rd.randint(0,TailleYFenetre))
+        self.solide = pygame.Rect(self.position.x,self.position.y,TailleXVaisseau,TailleYVaisseau)
+        while self.solide.collidelist(carreplanete2) != -1:
+            self.solide = pygame.Rect(self.position.x,self.position.y,TailleXVaisseau,TailleYVaisseau)
+            self.position = Vecteur(rd.randint(0,TailleXFenetre),rd.randint(0,TailleYFenetre))
+            print("fuck")
+    def gererVie (): ######################################
+        for i in range(nbVaisseaux):
+            if vaisseaux[i].pv <= 0:
+                son_explosion.play()
+                text = font.render(str(vaisseaux[i].nom)+"   a perdu   ",1, (0, 255, 255))
+                fenetre.blit(text, (200,200))
+
+
 
 
             
@@ -188,14 +220,13 @@ class Comete:
     informations des vaisseaux'''
     def __init__(self,ID):
 
-        #self.position = Vecteur(rd.randint(0,TailleXFenetre),rd.randint(0,TailleYFenetre))
         self.position = Vecteur(0,rd.randint(0,TailleYFenetre))
-
+        self.TailleComete=40
         self.vitesse = Vecteur(200,rd.randint(-50,50))
         self.acceleration = Vecteur(0,0)
-        
+
         self.image =  pygame.image.load("comet.png").convert_alpha()
-        self.image = pygame.transform.scale(self.image,(40,40))
+        self.image = pygame.transform.scale(self.image,(self.TailleComete,self.TailleComete))
 
         ##Vecteur unitaire perpendiculaire à utheta
         self.ur = Vecteur(0,0)
@@ -206,8 +237,11 @@ class Comete:
         self.carburant = 1000
 
         self.id = ID
-        
-        self.solide = pygame.Rect(self.position.x,self.position.y,TailleXVaisseau,TailleYVaisseau)
+
+        self.solide = pygame.Rect(self.position.x,self.position.y,self.TailleComete,self.TailleComete)
+
+
+
 
 
 
@@ -286,14 +320,14 @@ class Comete:
 
     def gererCollisions(self):
 
-        Liste = copy.deepcopy(carresolide)
+        Liste = copy.deepcopy(carrevaisseau)
 
         Liste.pop(self.id) ## on retire le vaisseau des objets bloqués
   
         ##print(self.solide.colliderect(Liste[0]))
         
         if self.solide.collidelist(Liste) != -1:
-            continuer = 0
+            print("collision")
             
 
 
@@ -346,9 +380,29 @@ class planete:
         
         if self.solide.collidelist(Liste) != -1:
             print("c'est le bordel")
+
+    def initialiserPositions(self):
+
+        global carreplanete
+        global carreplanete2
+        
+        self.x = rd.randint(100,TailleXFenetre-100)
+        self.y = rd.randint(100,TailleYFenetre-100)
+        self.solide2 = pygame.Rect( self.x - (self.rayon * 2) * pow(1/2,1/2), self.y - (self.rayon * 2)*pow(1/2, 0.5), 4*self.rayon* pow(0.5, 0.5) ,4*self.rayon*pow(0.5,0.5))
+        self.solide = pygame.Rect( self.x - self.rayon * pow(1/2,1/2), self.y - self.rayon*pow(1/2, 0.5), 2*self.rayon* pow(0.5, 0.5) ,2*self.rayon*pow(0.5,0.5))
+
+        
+        while self.solide.collidelist(carreplanete2) != -1:
+            self.x = rd.randint(100,TailleXFenetre-100)
+            self.y = rd.randint(100,TailleYFenetre-100)
+            self.solide2 = pygame.Rect( self.x - (self.rayon * 2) * pow(1/2,1/2), self.y - (self.rayon * 2)*pow(1/2, 0.5), 4*self.rayon* pow(0.5, 0.5) ,4*self.rayon*pow(0.5,0.5))
+            self.solide = pygame.Rect( self.x - self.rayon * pow(1/2,1/2), self.y - self.rayon*pow(1/2, 0.5), 2*self.rayon* pow(0.5, 0.5) ,2*self.rayon*pow(0.5,0.5))
+
             
 
-
+        carreplanete2.append(self.solide2)
+        carreplanete.append(self.solide)
+        
 
 
 
@@ -448,10 +502,10 @@ T = t.time()
 ##Pas d'intégration et vitesse de la boucle
 pasDeTemps = 20e-3
 tpscometes=10
-nbPlanetes = 1
+nbPlanetes = 5
 nbVaisseaux = 2
 PV = 10
-nbCometes=4
+nbCometes=25
 
 ##Planètes:
 rayonMinPlanete = 20
@@ -473,14 +527,29 @@ vaisseaux = []
 missiles  = []
 cometes = []
 
+carreplanete = []
+carreplanete2 = []
 ##Création des planètes et des vaisseaux
 for i in range(nbPlanetes):
     planetes.append(planete(i))
+    planetes[i].initialiserPositions()
+##A changer, j'ai déplacé la définition de carré solide
+## on liste tous les solides 
+##carreplanete = [planetes[i].solide for i in range(nbPlanetes)]
+
+##carreplanete2 = [planetes[i].solide2 for i in range(nbPlanetes)]
+
+
+nomson = [ "lasercoupe.wav" , "missilecoupe.wav"]
 for i in range(nbVaisseaux):
-    vaisseaux.append(Vaisseau(i,Vecteur(rd.randint(0,TailleXFenetre),rd.randint(0,TailleYFenetre)),Vecteur(50,-50),Couleur(255,rd.randint(0,255),0)))
+    vaisseaux.append(Vaisseau(i,Vecteur(rd.randint(0,TailleXFenetre),rd.randint(0,TailleYFenetre)),Vecteur(50,-50),Couleur(255,rd.randint(0,255),0),nomson[i],i))
+    
+carrevaisseau = [ vaisseaux[i].solide for i in range(nbVaisseaux)]
+carresolide = carrevaisseau + carreplanete #+carrecomete
+
 for i in range(nbCometes):
     cometes.append(Comete(i))
-    
+carrecomete = [cometes[i].solide for i in range(nbCometes)]
 
 ##TOUCHES
 ##Tableau selon les joueurs: Joueuri = [gauche,bas,droit,haut,tir]
@@ -507,15 +576,10 @@ fond = pygame.image.load("fond.jpg").convert()
 ##On l'agrandit
 fond = pygame.transform.scale(fond,(TailleXFenetre,TailleYFenetre))
 
-## on liste tous les solides 
-carreplanete = [planetes[i].solide for i in range(nbPlanetes)]
-carrevaisseau = [ vaisseaux[i].solide for i in range(nbVaisseaux)]
-#carrecomete = [cometes[i].solide for i in range(nbCometes)]
-carreplanete2 = [planetes[i].solide2 for i in range(nbPlanetes)]
-carresolide = carrevaisseau + carreplanete #+carrecomete
-affichage=0
 
 tpscomete=t.time()
+nvellevague=0
+a=3
 
 #Boucle infinie
 while continuer:
@@ -576,7 +640,7 @@ while continuer:
                                 if vaisseaux[j].munitions >0:
                                     missiles.append(Missile(Vecteur(vaisseaux[j].position.x,vaisseaux[j].position.y),Vecteur(vaisseaux[j].utheta.x*500,vaisseaux[j].utheta.y*500),j,len(missiles)))
                                     vaisseaux[j].munitions -= 1
-                            
+                                    vaisseaux[j].son.play()
 ##                        if nbVaisseaux >= 2:
 ##                            if nomTouche == touches[1][2]:
 ##                                vaisseaux[1].vitesse = Vecteur.somme(vaisseaux[1].vitesse,Vecteur.multiplie(vaisseaux[1].ur,poussee))
@@ -600,23 +664,23 @@ while continuer:
 
         ##construction cometes:
                      ##Cometes :
-        
-
-        if t.time()-tpscomete>=10:
-            if affichage==0:
-                affichage=1
-            else :
-                for i in range(nbCometes):
-                    cometes.append(Comete(i))
+        if t.time()-tpscomete >= 10:
+            a=rd.randint(1,4)
+            nvellevague=nvellevague+a
             tpscomete=t.time()
             
+            
 
-        if affichage==1:
-            for i in range(nbCometes):
+        
+        for i in range(nvellevague,nvellevague+a):
                 
-                cometes[i].bouger()
-                fenetre.blit(cometes[i].image, (cometes[i].position.x,cometes[i].position.y))
-               
+            cometes[i].bouger()
+            carrecomete = [cometes[i].solide for i in range(nbCometes)]
+            #rectangle = pygame.draw.rect(fenetre,(255,0,255),cometes[i].solide)
+            fenetre.blit(cometes[i].image, (cometes[i].position.x,cometes[i].position.y))
+        
+
+                       
         
                 
         
@@ -683,6 +747,8 @@ while continuer:
 
         text = font.render("PV: "+str(vaisseaux[1].pv), 1, (255, 255, 255))
         fenetre.blit(text, (TailleXFenetre-200,100))
+
+        Vaisseau.gererVie() ######################################
         
         pygame.display.flip()
         T = t.time()
