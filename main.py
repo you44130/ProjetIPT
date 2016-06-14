@@ -574,7 +574,7 @@ while continuer:
                                 vaisseaux[j].carburant -= CARBURANT_PAR_POUSSEE
                             if nomTouche == touches[j][4]:
                                 if vaisseaux[j].munitions >0:
-                                    missiles.append(Missile(Vecteur(vaisseaux[j].position.x,vaisseaux[j].position.y),Vecteur(vaisseaux[j].utheta.x*500,vaisseaux[j].utheta.y*500),0,len(missiles)))
+                                    missiles.append(Missile(Vecteur(vaisseaux[j].position.x,vaisseaux[j].position.y),Vecteur(vaisseaux[j].utheta.x*500,vaisseaux[j].utheta.y*500),j,len(missiles)))
                                     vaisseaux[j].munitions -= 1
                             
 ##                        if nbVaisseaux >= 2:
