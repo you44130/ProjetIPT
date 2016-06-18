@@ -33,7 +33,7 @@ NB_MUNITIONS_VAISSEAUX = int(lignesmieux[3][1])
 rayonMaxPlanete = int(lignesmieux[4][1])
 rayonMinPlanete = int(lignesmieux[5][1])
 NOMBRE_CARBURANT = int(lignesmieux[6][1])
-CARBURANT_PAR_POUSSEE = int(lignesmieux[7][1])
+CARBURANT_PAR_POUSSEE = float(lignesmieux[7][1])
 COEFFICIENT_ATTRACTION = float(lignesmieux[8][1])
 fichierConfig.close()
 
@@ -54,6 +54,41 @@ fenetre = pygame.display.set_mode((TailleXFenetre, TailleYFenetre))
 ##son_menu = pygame.mixer.Sound("menu.wav")
 ##son_explosion = pygame.mixer.Sound("explosion.wav")
 son_explosion = pygame.mixer.Sound("explosion.wav")
+
+class Bouton :
+
+    def __init__(self,x,y,texte,image,tailleX,tailleY):
+        self.x = x
+        self.y = y
+        self.texte = texte
+
+        self.tailleX = tailleX
+        self.tailleY = tailleY
+        self.image = pygame.transform.scale(image,(tailleX,tailleY))
+
+    def clic(self,x,y):
+
+        if self.x < x < self.x + self.tailleX and self.y < y < self.y + self.tailleY:
+            return 1
+        else:
+            return 0
+        
+    def afficher(self):
+
+        fenetre.blit(self.image,(self.x,self.y))
+
+
+white = 255,255,255
+rouge = 254,35,40
+noir = 0,0,0
+
+jouer = Bouton(220,320,"",pygame.image.load("jouer.png").convert_alpha(),200,100)
+option = Bouton(540, 330,"", pygame.image.load("option.png").convert_alpha(),50,50)
+planete_plus = Bouton(220,220,"",pygame.image.load("bouton_plus.jpg").convert_alpha(),30,30)
+planete_moins = Bouton(370,220,"",pygame.image.load("bouton_moins.jpg").convert_alpha(),30,30)
+police = pygame.font.SysFont('Arial Black', 25)
+
+
 
 
 class Couleur:
@@ -231,7 +266,7 @@ class Vaisseau:
         while self.solide.collidelist(carreplanete3) != -1:
             self.solide = pygame.Rect(self.position.x,self.position.y,TailleXVaisseau,TailleYVaisseau)
             self.position = Vecteur(rd.randint(0,TailleXFenetre),rd.randint(0,TailleYFenetre))
-            print("Probleme")
+
 
             
     def gererVie (): ######################################
@@ -398,8 +433,8 @@ class Comete:
   
         ##print(self.solide.colliderect(Liste[0]))
         
-        if self.solide.collidelist(Liste) != -1:
-            print("collision")
+        
+            
             
 
 
@@ -589,7 +624,7 @@ font50 = pygame.font.Font(None, 50)
 
 pygame.key.set_repeat(100, 60)
 
-avancement = 1
+avancement = 0
 
 ##CONSTANTES D'AVANCEMENT
 AVANCEMENT_MENU = 0
@@ -599,10 +634,45 @@ tempsPAUSE = t.time()
 AVANCEMENT_JOUER = 2
 AVANCEMENT_PERDU = 3
 
-
-
+nbPlanetes = 2
+fondMenu = pygame.image.load("etoile.jpg").convert()
+fondMenu = pygame.transform.scale(fondMenu,(TailleXFenetre,TailleYFenetre))
 #Boucle infinie
 while continuer:
+
+    if avancement == AVANCEMENT_MENU:
+        for event in pygame.event.get(): #cherche dans les événements pygame
+            if event.type == QUIT:
+                continuer = 0
+            if event.type == MOUSEBUTTONDOWN:
+                x = event.pos[0]
+                y = event.pos[1]
+                if jouer.clic(x,y)== 1:
+                    avancement = AVANCEMENT_PROGRAMMATION_JEU
+                if option.clic(x,y) == 1:
+                    o = 1
+                if planete_plus.clic(x,y) == 1:
+                    if nbPlanetes<8:
+                        nbPlanetes+=1
+                if planete_moins.clic(x,y) == 1:
+                    if nbPlanetes >1:
+                        nbPlanetes -=1
+        #on charge le fond et on l'affiche
+        fenetre.blit(fondMenu, (0,0))
+
+        jouer.afficher()
+        option.afficher()
+
+        texte = police.render(str(nbPlanetes), True, noir)
+        fenetre.blit(texte,(300,220))
+        texte = police.render("Nombre de planètes:",True,noir)
+        fenetre.blit(texte,(200,180))
+        planete_plus.afficher()
+        
+        planete_moins.afficher()
+        pygame.display.flip()
+
+        
 
     if avancement == AVANCEMENT_PROGRAMMATION_JEU:
 
@@ -611,7 +681,7 @@ while continuer:
         ##Pas d'intégration et vitesse de la boucle
         pasDeTemps = 20e-3
         tpscometes=10
-        nbPlanetes = 12
+
         
         nbVaisseaux = 2
 
@@ -835,7 +905,7 @@ while continuer:
                 vaisseaux[i].bouger()
                 fenetre.blit( vaisseaux[i].image,( vaisseaux[i].position.x,vaisseaux[i].position.y))
                 ##vaisseaux[i].gererCollisions()
-                rectangle = pygame.draw.rect(fenetre,(255,0,0),vaisseaux[i].solide)            
+                #rectangle = pygame.draw.rect(fenetre,(255,0,0),vaisseaux[i].solide)            
                 
                 ##Dessin des vitesses des vaisseaux et des vecteur utheta et ur
                 Vligne = pygame.draw.line(fenetre, (255,255,255), (vaisseaux[i].position.x,vaisseaux[i].position.y), (vaisseaux[i].position.x+vaisseaux[i].vitesse.x,vaisseaux[i].position.y+vaisseaux[i].vitesse.y))
@@ -861,7 +931,7 @@ while continuer:
             text = font.render("P = ("+str(int(vaisseaux[0].position.x))+" , "+str(int(vaisseaux[0].position.y))+")", 1, (255, 255, 255))
             fenetre.blit(text, (20,40))
 
-            text = font.render("Carburant: "+str(vaisseaux[0].carburant), 1, (255, 255, 255))
+            text = font.render("Carburant: "+str(int(vaisseaux[0].carburant)), 1, (255, 255, 255))
             fenetre.blit(text, (20,60))
 
             text = font.render("Munitions: "+str(vaisseaux[0].munitions), 1, (255, 255, 255))
@@ -876,7 +946,7 @@ while continuer:
             text = font.render("P = ("+str(int(vaisseaux[1].position.x))+" , "+str(int(vaisseaux[1].position.y))+")", 1, (255, 255, 255))
             fenetre.blit(text, (TailleXFenetre-200,40))
 
-            text = font.render("Carburant: "+str(vaisseaux[1].carburant), 1, (255, 255, 255))
+            text = font.render("Carburant: "+str(int(vaisseaux[1].carburant)), 1, (255, 255, 255))
             fenetre.blit(text, (TailleXFenetre-200,60))
 
             text = font.render("Munitions: "+str(vaisseaux[1].munitions), 1, (255, 255, 255))
@@ -934,12 +1004,20 @@ while continuer:
                         nomTouche = pygame.key.name(i)
                         if nomTouche == 'escape':
                         
+                            avancement = AVANCEMENT_MENU
+                            
+                        if nomTouche == 'r':
+                        
                             avancement = AVANCEMENT_PROGRAMMATION_JEU
+                        
+        
         
         text = font50.render("Le joueur "+str(idJoueurPerdu)+"  a perdu. Dommage "+vaisseaux[idJoueurPerdu-1].nom+" ! ",1, (0, 255, 255))
         fenetre.blit(text, (TailleXFenetre/6,TailleYFenetre/3))
         text = font50.render("Appuyez sur echap pour retourner au menu",1, (0, 255, 255))
         fenetre.blit(text, (TailleXFenetre/6,TailleYFenetre/3+100))
+        text = font50.render("Appuyez sur r pour rejouer",1, (0, 255, 255))
+        fenetre.blit(text, (TailleXFenetre/6,2*TailleYFenetre/3+100))
         
         pygame.display.flip()
         
