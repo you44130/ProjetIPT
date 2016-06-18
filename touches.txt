@@ -1,0 +1,12 @@
+Joueur 1:
+droite right
+gauche left
+haut up
+bas down
+tir space
+Joueur 2:
+droite d
+gauche a
+haut w
+bas s
+tir e

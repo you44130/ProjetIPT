@@ -1,0 +1,10 @@
+TailleXFenetre 1200
+TailleYFenetre 650
+PVVaisseaux 10
+Munitions 100
+rayonMaxPlanete 20
+rayonMinPlanete 10
+Carburant 1000
+CarburantConsomme 2
+COEFFICIENT_ATTRACTION 6.9 #Entre 6 et 7
+
