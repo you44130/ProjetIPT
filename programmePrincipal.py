@@ -17,13 +17,35 @@ import math as m
 import time as t
 import copy
 
-##Dimensions de la fenetre
-TailleXFenetre = 1200
-TailleYFenetre = 750
+##Chargement de la config
+fichierConfig = open("config.txt","r")
+lignes = fichierConfig.readlines()
+lignesmieux = []
+for i in lignes:
+    l = i.strip()
+    l = l.split()
+    lignesmieux.append(l)
+    
+TailleXFenetre = int(lignesmieux[0][1])
+TailleYFenetre = int(lignesmieux[1][1])
+PV =  int(lignesmieux[2][1])
+NB_MUNITIONS_VAISSEAUX = int(lignesmieux[3][1])
+rayonMaxPlanete = int(lignesmieux[4][1])
+rayonMinPlanete = int(lignesmieux[5][1])
+NOMBRE_CARBURANT = int(lignesmieux[6][1])
+CARBURANT_PAR_POUSSEE = int(lignesmieux[7][1])
+COEFFICIENT_ATTRACTION = float(lignesmieux[8][1])
+fichierConfig.close()
+
+####Dimensions de la fenetre
+##TailleXFenetre = 1200
+##TailleYFenetre = 700
 
 #Initialisation de la bibliothèque Pygame
 pygame.init()
 
+
+pygame.display.set_caption("SPACE CONTROLLER")
 fenetre = pygame.display.set_mode((TailleXFenetre, TailleYFenetre))
 
 
@@ -70,6 +92,12 @@ class Vaisseau:
 
         self.position = Posinit
         self.vitesse = Vinit
+
+        V = Vecteur(0,0)
+        while V.norme()<80:
+            V.x = rd.randint(-60,60)
+            V.y = rd.randint(-60,60)
+        self.vitesse = V
         self.acceleration = Vecteur(0,0)
         self.son = pygame.mixer.Sound(nomson)
         self.nom = NOM
@@ -83,7 +111,7 @@ class Vaisseau:
         ##Vecteur unitaire colinèaire a la vitesse
         self.utheta = Vecteur(0,0)
 
-        self.carburant = 1000
+        self.carburant = NOMBRE_CARBURANT
 
         self.pv = PV
 
@@ -91,7 +119,7 @@ class Vaisseau:
 
         self.munitions = NB_MUNITIONS_VAISSEAUX
         
-        self.solide = pygame.Rect(self.position.x,self.position.y,TailleXVaisseau,TailleYVaisseau)
+        self.solide = pygame.Rect(self.position.x+TailleXVaisseau/6,self.position.y+TailleYVaisseau/6,2*TailleXVaisseau/3,2*TailleYVaisseau/3)
 
         ##A rajhouter
         self.initialiser_position()
@@ -150,7 +178,7 @@ class Vaisseau:
 
 
 
-        self.solide = pygame.Rect(self.position.x,self.position.y,TailleXVaisseau,TailleYVaisseau)
+        self.solide = pygame.Rect(self.position.x+TailleXVaisseau/6,self.position.y+TailleYVaisseau/6,2*TailleXVaisseau/3,2*TailleYVaisseau/3)
 
         
         ##Vérification des délimitations
@@ -200,7 +228,7 @@ class Vaisseau:
         
         self.position = Vecteur(rd.randint(0,TailleXFenetre),rd.randint(0,TailleYFenetre))
         self.solide = pygame.Rect(self.position.x,self.position.y,TailleXVaisseau,TailleYVaisseau)
-        while self.solide.collidelist(carreplanete2) != -1:
+        while self.solide.collidelist(carreplanete3) != -1:
             self.solide = pygame.Rect(self.position.x,self.position.y,TailleXVaisseau,TailleYVaisseau)
             self.position = Vecteur(rd.randint(0,TailleXFenetre),rd.randint(0,TailleYFenetre))
             print("Probleme")
@@ -249,7 +277,9 @@ class Comete:
 
         self.id = ID
 
-        self.solide = pygame.Rect(self.position.x,self.position.y,self.TailleComete,self.TailleComete)
+
+        self.solide = pygame.Rect(self.position.x+self.TailleComete/6,self.position.y+self.TailleComete/6,2*self.TailleComete/3,2*self.TailleComete/3)
+
 
 
         self.etat = 1 #En vie ou non
@@ -328,7 +358,7 @@ class Comete:
         self.carburant -= pasDeTemps
 
 
-        self.solide = pygame.Rect(self.position.x,self.position.y,self.TailleComete,self.TailleComete)
+        self.solide = pygame.Rect(self.position.x+self.TailleComete/6,self.position.y+self.TailleComete/6,2*self.TailleComete/3,2*self.TailleComete/3)
 
         
         ##Vérification des délimitations
@@ -390,7 +420,7 @@ class planete:
     def genererayonplanet():
         '''Genere un rayon aléatoire'''
         R = rd.randint(rayonMinPlanete,rayonMaxPlanete)
-        m = 4/3 * 3.14 * ((R * 100) ** 3) * 6.8 ** 18
+        m = 4/3 * 3.14 * ((R * 100) ** 3) * COEFFICIENT_ATTRACTION ** 18
         #calcul de la masse de la planète pour un rayon de l'ordre de 10^2
         return([R,m])
 
@@ -413,35 +443,34 @@ class planete:
         self.solide = pygame.Rect( self.x - self.rayon * pow(1/2,1/2), self.y - self.rayon*pow(1/2, 0.5), 2*self.rayon* pow(0.5, 0.5) ,2*self.rayon*pow(0.5,0.5))
 
         self.solide2 = pygame.Rect( self.x - (self.rayon * 2) * pow(1/2,1/2), self.y - (self.rayon * 2)*pow(1/2, 0.5), 4*self.rayon* pow(0.5, 0.5) ,4*self.rayon*pow(0.5,0.5))
+        ##Solide encore plus grand
+        self.solide3 = pygame.Rect( self.x - (self.rayon * 4) * pow(1/2,1/2), self.y - (self.rayon * 4)*pow(1/2, 0.5), 8*self.rayon* pow(0.5, 0.5) ,8*self.rayon*pow(0.5,0.5))
 
 
-    def gererCollisions(self):
-        Liste = copy.deepcopy(carreplanete2)
+    
 
-        Liste.pop(self.id) ## on retire le vaisseau des objets bloqués
-        
-        if self.solide.collidelist(Liste) != -1:
-            print("c'est le bordel")
 
     def initialiserPositions(self):
 
         global carreplanete
         global carreplanete2
+        global carreplanete3
         
         self.x = rd.randint(100,TailleXFenetre-100)
         self.y = rd.randint(100,TailleYFenetre-100)
         self.solide2 = pygame.Rect( self.x - (self.rayon * 2) * pow(1/2,1/2), self.y - (self.rayon * 2)*pow(1/2, 0.5), 4*self.rayon* pow(0.5, 0.5) ,4*self.rayon*pow(0.5,0.5))
         self.solide = pygame.Rect( self.x - self.rayon * pow(1/2,1/2), self.y - self.rayon*pow(1/2, 0.5), 2*self.rayon* pow(0.5, 0.5) ,2*self.rayon*pow(0.5,0.5))
-
+        self.solide3 = pygame.Rect( self.x - (self.rayon * 4) * pow(1/2,1/2), self.y - (self.rayon * 4)*pow(1/2, 0.5), 8*self.rayon* pow(0.5, 0.5) ,8*self.rayon*pow(0.5,0.5))
         
-        while self.solide.collidelist(carreplanete2) != -1:
+        while self.solide.collidelist(carreplanete3) != -1:
             self.x = rd.randint(100,TailleXFenetre-100)
             self.y = rd.randint(100,TailleYFenetre-100)
             self.solide2 = pygame.Rect( self.x - (self.rayon * 2) * pow(1/2,1/2), self.y - (self.rayon * 2)*pow(1/2, 0.5), 4*self.rayon* pow(0.5, 0.5) ,4*self.rayon*pow(0.5,0.5))
             self.solide = pygame.Rect( self.x - self.rayon * pow(1/2,1/2), self.y - self.rayon*pow(1/2, 0.5), 2*self.rayon* pow(0.5, 0.5) ,2*self.rayon*pow(0.5,0.5))
+            self.solide3 = pygame.Rect( self.x - (self.rayon * 4) * pow(1/2,1/2), self.y - (self.rayon * 4)*pow(1/2, 0.5), 8*self.rayon* pow(0.5, 0.5) ,8*self.rayon*pow(0.5,0.5))
 
             
-
+        carreplanete3.append(self.solide3)
         carreplanete2.append(self.solide2)
         carreplanete.append(self.solide)
         
@@ -572,7 +601,6 @@ AVANCEMENT_PERDU = 3
 
 
 
-
 #Boucle infinie
 while continuer:
 
@@ -583,15 +611,18 @@ while continuer:
         ##Pas d'intégration et vitesse de la boucle
         pasDeTemps = 20e-3
         tpscometes=10
-        nbPlanetes = 0
+        nbPlanetes = 12
+        
         nbVaisseaux = 2
-        PV = 10
+
+        
+        #PV = 10
 
 
 
         ##Planètes:
-        rayonMinPlanete = 20
-        rayonMaxPlanete = 50
+        #rayonMinPlanete = 20
+        #rayonMaxPlanete = 50
 
         ##Taille de l'image vaisseau
         TailleXVaisseau = 30
@@ -599,9 +630,10 @@ while continuer:
         #Augmentation de la vitesse a chaque poussée
         poussee = 8
 
-        CARBURANT_PAR_POUSSEE = 2
+        #CARBURANT_PAR_POUSSEE = 2
+        #NOMBRE_CARBURANT = 1000
 
-        NB_MUNITIONS_VAISSEAUX = 100
+        #NB_MUNITIONS_VAISSEAUX = 100
 
         ##Liste des différents objets
         planetes = []
@@ -611,6 +643,7 @@ while continuer:
 
         carreplanete = []
         carreplanete2 = []
+        carreplanete3 = []
         ##Création des planètes et des vaisseaux
         for i in range(nbPlanetes):
             planetes.append(planete(i))
@@ -623,7 +656,22 @@ while continuer:
 
 
         nomson = [ "lasercoupe.wav" , "missilecoupe.wav"]
-        noms = ["Lionel","Agnes"] ##Noms des joueurs
+
+        
+        
+        ##Chargement des noms des joueurs
+        fichierNom = open("nomsJoueurs.txt","r")
+        lignes = fichierNom.readlines()
+
+        fichierConfig.close()
+        
+        noms = []
+        for i in lignes:
+            l = i.strip()
+            noms.append(l)
+
+        fichierNom.close()
+
         for i in range(nbVaisseaux):
             vaisseaux.append(Vaisseau(i,Vecteur(rd.randint(0,TailleXFenetre),rd.randint(0,TailleYFenetre)),Vecteur(50,-50),Couleur(255,rd.randint(0,255),0),nomson[i],noms[i]))
             
@@ -638,8 +686,35 @@ while continuer:
         ##Tableau selon les joueurs: Joueuri = [gauche,bas,droit,haut,tir]
         # touches = [Joueur 1, Joueur 2]
 
+        ##Chargement des touches
+        fichierTouches = open("touches.txt","r")
+        lignes = fichierTouches.readlines()
+        lignesmieux = []
+        for i in lignes:
+            l = i.strip()
+            l = l.split()
+            lignesmieux.append(l)
 
-        touches = [['left','down','right','up','space'],['a','s','d','w','e']]
+        touches = []
+
+        
+        touche1 = ['','','','','','']
+        touche1[0] = lignesmieux[2][1]
+        touche1[1] = lignesmieux[4][1]
+        touche1[2] = lignesmieux[1][1]
+        touche1[3] = lignesmieux[3][1]
+        touche1[4] = lignesmieux[5][1]
+        touches.append(touche1)
+        touche2 = ['','','','','','']
+        touche2[0] = lignesmieux[8][1]
+        touche2[1] = lignesmieux[10][1]
+        touche2[2] = lignesmieux[7][1]
+        touche2[3] = lignesmieux[9][1]
+        touche2[4] = lignesmieux[11][1]
+        touches.append(touche2)
+
+        fichierTouches.close()
+        #touches = [['left','down','right','up','space'],['a','s','d','w','e']]
 
 
 
@@ -665,7 +740,6 @@ while continuer:
             
             for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
                 if event.type == QUIT:     #Si un de ces événements est de type QUIT
-                    print("lol")
                     continuer = 0
 
                             ##Appui d'une touche
@@ -694,18 +768,20 @@ while continuer:
                             nomTouche = pygame.key.name(i)
 
                             for j in range(nbVaisseaux):
-                                if nomTouche == touches[j][2]:
-                                    vaisseaux[j].vitesse = Vecteur.somme(vaisseaux[j].vitesse,Vecteur.multiplie(vaisseaux[j].ur,poussee))
-                                    vaisseaux[j].carburant -= CARBURANT_PAR_POUSSEE
-                                if nomTouche == touches[j][0]:
-                                    vaisseaux[j].vitesse = Vecteur.somme(vaisseaux[j].vitesse,Vecteur.multiplie(vaisseaux[j].ur,-poussee))
-                                    vaisseaux[j].carburant -= CARBURANT_PAR_POUSSEE
-                                if nomTouche == touches[j][3]:
-                                    vaisseaux[j].vitesse = Vecteur.somme(vaisseaux[j].vitesse,Vecteur.multiplie(vaisseaux[j].utheta,poussee))
-                                    vaisseaux[j].carburant -= CARBURANT_PAR_POUSSEE
-                                if nomTouche == touches[j][1]:
-                                    vaisseaux[j].vitesse= Vecteur.somme(vaisseaux[j].vitesse,Vecteur.multiplie(vaisseaux[j].utheta,-poussee))
-                                    vaisseaux[j].carburant -= CARBURANT_PAR_POUSSEE
+
+                                if vaisseaux[j].carburant>0:
+                                    if nomTouche == touches[j][2]:
+                                        vaisseaux[j].vitesse = Vecteur.somme(vaisseaux[j].vitesse,Vecteur.multiplie(vaisseaux[j].ur,poussee))
+                                        vaisseaux[j].carburant -= CARBURANT_PAR_POUSSEE
+                                    if nomTouche == touches[j][0]:
+                                        vaisseaux[j].vitesse = Vecteur.somme(vaisseaux[j].vitesse,Vecteur.multiplie(vaisseaux[j].ur,-poussee))
+                                        vaisseaux[j].carburant -= CARBURANT_PAR_POUSSEE
+                                    if nomTouche == touches[j][3]:
+                                        vaisseaux[j].vitesse = Vecteur.somme(vaisseaux[j].vitesse,Vecteur.multiplie(vaisseaux[j].utheta,poussee))
+                                        vaisseaux[j].carburant -= CARBURANT_PAR_POUSSEE
+                                    if nomTouche == touches[j][1]:
+                                        vaisseaux[j].vitesse= Vecteur.somme(vaisseaux[j].vitesse,Vecteur.multiplie(vaisseaux[j].utheta,-poussee))
+                                        vaisseaux[j].carburant -= CARBURANT_PAR_POUSSEE
                                 if nomTouche == touches[j][4]:
                                     if vaisseaux[j].munitions >0:
                                         missiles.append(Missile(Vecteur(vaisseaux[j].position.x,vaisseaux[j].position.y),Vecteur(vaisseaux[j].utheta.x*500,vaisseaux[j].utheta.y*500),j,len(missiles)))
@@ -748,7 +824,7 @@ while continuer:
             ##Dessin des planètes (cercles)
             for i in range(nbPlanetes):
                 cercle = pygame.draw.circle(fenetre,(planetes[i].couleur.r,planetes[i].couleur.g,planetes[i].couleur.b),(planetes[i].x,planetes[i].y),planetes[i].rayon)
-                #rectangle = pygame.draw.rect(fenetre,(255,0,255),planetes[i].solide)
+                #rectangle = pygame.draw.rect(fenetre,(255,0,255),planetes[i].solide3)
            
                     
                 
@@ -759,7 +835,7 @@ while continuer:
                 vaisseaux[i].bouger()
                 fenetre.blit( vaisseaux[i].image,( vaisseaux[i].position.x,vaisseaux[i].position.y))
                 ##vaisseaux[i].gererCollisions()
-                ##rectangle = pygame.draw.rect(fenetre,(255,0,0),vaisseaux[i].solide)            
+                rectangle = pygame.draw.rect(fenetre,(255,0,0),vaisseaux[i].solide)            
                 
                 ##Dessin des vitesses des vaisseaux et des vecteur utheta et ur
                 Vligne = pygame.draw.line(fenetre, (255,255,255), (vaisseaux[i].position.x,vaisseaux[i].position.y), (vaisseaux[i].position.x+vaisseaux[i].vitesse.x,vaisseaux[i].position.y+vaisseaux[i].vitesse.y))
@@ -821,7 +897,6 @@ while continuer:
         
         for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
             if event.type == QUIT:     #Si un de ces événements est de type QUIT
-                print("lol")
                 continuer = 0
                 
             if event.type == KEYDOWN:
@@ -835,17 +910,21 @@ while continuer:
                             if nomTouche == 'pause':
                                 avancement = AVANCEMENT_JOUER
                                 tempsPAUSE = t.time()
+                        if nomTouche == 'escape':
+                            avancement = AVANCEMENT_PROGRAMMATION_JEU
 
         ##On affiche pause
         text = font50.render("PAUSE",1, (0, 255, 255))
         fenetre.blit(text, (TailleXFenetre/6,TailleYFenetre/3))
+        text = font50.render("Appuyez sur echap pour retourner au menu",1, (0, 255, 255))
+        fenetre.blit(text, (3*TailleXFenetre/10,11*TailleYFenetre/15))
+        
         pygame.display.flip()
 
     if avancement == AVANCEMENT_PERDU:
 
         for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
             if event.type == QUIT:     #Si un de ces événements est de type QUIT
-                print("lol")
                 continuer = 0
             if event.type == KEYDOWN:
                 touchesPressees = pygame.key.get_pressed()
@@ -853,13 +932,13 @@ while continuer:
                 for i in range(0,len(touchesPressees)): 
                     if touchesPressees[i] == 1 :
                         nomTouche = pygame.key.name(i)
-                        if nomTouche == 'space':
+                        if nomTouche == 'escape':
                         
                             avancement = AVANCEMENT_PROGRAMMATION_JEU
         
-        text = font50.render("Le joueur "+str(idJoueurPerdu)+"  a perdu   ",1, (0, 255, 255))
+        text = font50.render("Le joueur "+str(idJoueurPerdu)+"  a perdu. Dommage "+vaisseaux[idJoueurPerdu-1].nom+" ! ",1, (0, 255, 255))
         fenetre.blit(text, (TailleXFenetre/6,TailleYFenetre/3))
-        text = font50.render("Appuyez sur espace pour retourner au menu",1, (0, 255, 255))
+        text = font50.render("Appuyez sur echap pour retourner au menu",1, (0, 255, 255))
         fenetre.blit(text, (TailleXFenetre/6,TailleYFenetre/3+100))
         
         pygame.display.flip()
