@@ -1,0 +1,14 @@
+- Ouvrir nomsJoueurs.txt
+Indiquez les noms des deux joueurs avec un retour à la ligne
+
+-Possibilité de changer la configuration du jeu (plus de munitions, planètes plus grosses...)
+Pour ce faire ouvrez config.txt, et changer la valeur numérique
+
+- Possibilité de changer les touches pour les deux joueurs:
+Ouvrir touches.txt et changer la valeur des différentes actions, avec le mot clé en anglais
+
+-Ouvrir main.py avec l'IDLE et lancer le programme en appuyant sur F5
+
+- Choisir le nombre de planètes et regarder le tutoriel, appuyez sur Jouer
+
+- Battle !
