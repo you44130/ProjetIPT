@@ -179,10 +179,7 @@ class Vaisseau:
                 V = Vecteur(planetes[i].x-self.position.x,planetes[i].y-self.position.y)
                 
                 if V.norme() !=0:
-                    Vunit = Vecteur.multiplie(V,1/(V.norme()))
-                
-                    
-                
+                    Vunit = Vecteur.multiplie(V,1/(V.norme()))            
                     sommeForces.x += G*planetes[i].masse/pow(V.norme()*100*1000,2)*Vunit.x
                     sommeForces.y += G*planetes[i].masse/pow(V.norme()*100*1000,2)*Vunit.y
 
@@ -475,7 +472,8 @@ class planete:
         self.couleur = Couleur(rd.randint(0,255),rd.randint(0,255),rd.randint(0,255))
 
         ##On place un carré inscrit dans chaque planète pour créer une zone solide, celui-ci étant repéré par son coin supérieur gauche
-        self.solide = pygame.Rect( self.x - self.rayon * pow(1/2,1/2), self.y - self.rayon*pow(1/2, 0.5), 2*self.rayon* pow(0.5, 0.5) ,2*self.rayon*pow(0.5,0.5))
+        self.solide = pygame.Rect( self.x - self.rayon * pow(1/2,1/2), self.y - self.rayon*pow(1/2, 0.5),\
+                                   2*self.rayon* pow(0.5, 0.5) ,2*self.rayon*pow(0.5,0.5))
 
         self.solide2 = pygame.Rect( self.x - (self.rayon * 2) * pow(1/2,1/2), self.y - (self.rayon * 2)*pow(1/2, 0.5), 4*self.rayon* pow(0.5, 0.5) ,4*self.rayon*pow(0.5,0.5))
         ##Solide encore plus grand
@@ -981,7 +979,7 @@ while continuer:
                                 avancement = AVANCEMENT_JOUER
                                 tempsPAUSE = t.time()
                         if nomTouche == 'escape':
-                            avancement = AVANCEMENT_PROGRAMMATION_JEU
+                            avancement = AVANCEMENT_MENU
 
         ##On affiche pause
         text = font50.render("PAUSE",1, (0, 255, 255))
